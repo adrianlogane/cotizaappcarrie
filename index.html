@@ -1,3 +1,18 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cotizador">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#EEF1F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B111A" media="(prefers-color-scheme: dark)">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
 <title>Cotizador CHLG</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,9 +68,10 @@ h1 small{display:block;font-family:var(--f-body);font-weight:500;font-size:14px;
 .step{display:flex;flex-direction:column;gap:10px}
 .step h2{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.row3{grid-template-columns:repeat(3,minmax(0,1fr))}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted);min-width:0}
-input,select{font:500 15px var(--f-body);color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
-input[type=number]{font-family:var(--f-num);font-size:14px}
+input,select{font:500 16px var(--f-body);color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 11px;min-height:44px;width:100%;min-width:0}
+input[type=number]{font-family:var(--f-num);font-size:16px}
 input.auto{border-style:dashed}
 .hint{font-size:12.5px;color:var(--muted);font-weight:500}
 .hint b{color:var(--ink)}
@@ -106,6 +122,57 @@ textarea#qtext{position:absolute;left:-9999px}
 .ptable input{padding:6px 8px;font-size:13px}
 .note{font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:no-preference){.pbox .val{transition:color .2s}}
+
+/* barra inferior con el precio, solo en pantallas chicas */
+.mbar{display:none}
+@media (max-width:880px){
+  .result{position:static}
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;align-items:center;gap:12px;
+    background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(15,27,45,.12);
+    padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .mbar .mv{display:flex;flex-direction:column;min-width:0}
+  .mbar .mv span{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .mbar .mv b{font-family:var(--f-num);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .mbar .mv.main b{color:var(--accent)}
+  .mbar .btn{margin-left:auto;min-height:44px}
+  body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:600px){
+  body{font-size:16px;padding-block:12px 96px}
+  .wrap{gap:12px}
+  header.top{flex-direction:column;align-items:stretch;gap:10px}
+  h1{font-size:24px}
+  h1 small{font-size:13.5px}
+  .tabs{border-radius:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tabs button{border-radius:9px;padding:10px 4px;font-size:13px;white-space:normal;line-height:1.15;min-height:44px}
+  .roadsign{padding:10px 12px;gap:4px 10px}
+  .roadsign .pt{font-size:17px}
+  .roadsign .arrow{font-size:18px}
+  .roadsign .km{margin-left:0;width:100%;text-align:left;font-size:26px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .roadsign .km span{display:inline}
+  #v-reg .grid{margin-top:12px!important}
+  .grid{gap:12px}
+  .panel{padding:14px;gap:14px;border-radius:12px}
+  .row{gap:8px}
+  label.f{font-size:12.5px}
+  .row1m{grid-template-columns:minmax(0,1fr)}
+  .vehs{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .veh{padding:8px 9px;min-height:56px}
+  .veh b{font-size:15px}
+  .veh span{font-size:10.5px;letter-spacing:-.02em}
+  .checks{grid-template-columns:minmax(0,1fr);gap:6px}
+  .chk{min-height:46px;font-size:15px}
+  .chk input{width:20px;height:20px;min-height:0}
+  .seg{display:grid;grid-template-columns:1fr 1fr}
+  .seg button{min-height:44px}
+  .price{gap:8px}
+  .pbox{padding:10px}
+  .actions{display:grid;grid-template-columns:1fr}
+  .actions .btn{justify-content:center;min-height:46px}
+  table.bd{font-size:14.5px}
+  .ptable table{font-size:13px}
+}
 </style>
 
 <div class="wrap">
@@ -113,7 +180,7 @@ textarea#qtext{position:absolute;left:-9999px}
     <h1>Cotizador de transporte CHLG<small>Ingresa destino y carga; los kilómetros, el vehículo y el costo se calculan solos.</small></h1>
     <nav class="tabs" role="tablist">
       <button role="tab" id="t-reg" aria-selected="true" data-tab="reg">Regiones</button>
-      <button role="tab" id="t-urb" aria-selected="false" data-tab="urb">Santiago · Aeropuerto / Puerto</button>
+      <button role="tab" id="t-urb" aria-selected="false" data-tab="urb">Aeropuerto / Puerto</button>
       <button role="tab" id="t-par" aria-selected="false" data-tab="par">Parámetros</button>
     </nav>
   </header>
@@ -130,7 +197,7 @@ textarea#qtext{position:absolute;left:-9999px}
       <div class="panel">
         <div class="step">
           <h2>1 · Ruta</h2>
-          <div class="row">
+          <div class="row row1m">
             <label class="f">Origen
               <select id="r-origin">
                 <option value="PUD">Pudahuel (bodega)</option>
@@ -144,15 +211,15 @@ textarea#qtext{position:absolute;left:-9999px}
             </label>
           </div>
           <datalist id="comunas"></datalist>
-          <div class="row">
+          <div class="row row3">
             <label class="f">Km ida
-              <input id="r-km" type="number" min="0" step="1" class="auto">
+              <input id="r-km" type="number" inputmode="numeric" min="0" step="1" class="auto">
             </label>
             <label class="f">Días de viaje
-              <input id="r-days" type="number" min="1" step="1" class="auto">
+              <input id="r-days" type="number" inputmode="numeric" min="1" step="1" class="auto">
             </label>
             <label class="f">Noches fuera
-              <input id="r-nights" type="number" min="0" step="1" class="auto">
+              <input id="r-nights" type="number" inputmode="numeric" min="0" step="1" class="auto">
             </label>
           </div>
           <div class="hint" id="r-routehint">Los campos punteados se calculan solos. Escribe encima solo si quieres cambiarlos.</div>
@@ -160,10 +227,10 @@ textarea#qtext{position:absolute;left:-9999px}
 
         <div class="step">
           <h2>2 · Carga</h2>
-          <div class="row">
-            <label class="f">Peso (kg)<input id="r-kg" type="number" min="0" step="10"></label>
-            <label class="f">Volumen (m³)<input id="r-m3" type="number" min="0" step="0.5"></label>
-            <label class="f">Pallets<input id="r-pal" type="number" min="0" step="1"></label>
+          <div class="row row3">
+            <label class="f">Peso (kg)<input id="r-kg" type="number" inputmode="numeric" min="0" step="10"></label>
+            <label class="f">Volumen (m³)<input id="r-m3" type="number" inputmode="decimal" min="0" step="0.5"></label>
+            <label class="f">Pallets<input id="r-pal" type="number" inputmode="numeric" min="0" step="1"></label>
           </div>
           <div class="vehs" id="r-vehs"></div>
           <div class="hint" id="r-vehhint"></div>
@@ -180,9 +247,9 @@ textarea#qtext{position:absolute;left:-9999px}
           <details>
             <summary>Ajustar peajes, margen y otros</summary>
             <div class="row">
-              <label class="f">Peajes ($)<input id="r-toll" type="number" min="0" step="100" class="auto"></label>
-              <label class="f">Viaje conductor ($)<input id="r-cond" type="number" min="0" step="1000" class="auto"></label>
-              <label class="f">Otros gastos ($)<input id="r-other" type="number" min="0" step="1000" value="0"></label>
+              <label class="f">Peajes ($)<input id="r-toll" type="number" inputmode="numeric" min="0" step="100" class="auto"></label>
+              <label class="f">Viaje conductor ($)<input id="r-cond" type="number" inputmode="numeric" min="0" step="1000" class="auto"></label>
+              <label class="f">Otros gastos ($)<input id="r-other" type="number" inputmode="numeric" min="0" step="1000" value="0"></label>
               <label class="f">Margen (%)<input id="r-margin" type="number" min="0" max="200" step="1" class="auto"></label>
             </div>
             <div class="hint" style="margin-top:8px">Peajes estimados según km recorridos y tipo de vehículo (ya incluyen el 20% adicional que usa la planilla). Si conoces el valor real, escríbelo.</div>
@@ -204,7 +271,7 @@ textarea#qtext{position:absolute;left:-9999px}
             <button aria-pressed="true" data-v="air">Aeropuerto (impo/expo)</button>
             <button aria-pressed="false" data-v="port">Puerto SAI / VAP</button>
           </div>
-          <div class="row">
+          <div class="row row1m">
             <label class="f">Comuna de entrega / retiro
               <input id="u-dest" list="comunasRM" placeholder="Comuna de la RM…" autocomplete="off">
             </label>
@@ -216,10 +283,10 @@ textarea#qtext{position:absolute;left:-9999px}
         </div>
         <div class="step">
           <h2>2 · Carga</h2>
-          <div class="row">
-            <label class="f">Peso (kg)<input id="u-kg" type="number" min="0" step="10"></label>
-            <label class="f">Volumen (m³)<input id="u-m3" type="number" min="0" step="0.1"></label>
-            <label class="f">Cajas sueltas<input id="u-box" type="number" min="0" step="1" value="0"></label>
+          <div class="row row3">
+            <label class="f">Peso (kg)<input id="u-kg" type="number" inputmode="numeric" min="0" step="10"></label>
+            <label class="f">Volumen (m³)<input id="u-m3" type="number" inputmode="decimal" min="0" step="0.1"></label>
+            <label class="f">Cajas sueltas<input id="u-box" type="number" inputmode="numeric" min="0" step="1" value="0"></label>
           </div>
           <div class="hint">Se usa el primer tramo del tarifario que cubre peso y volumen a la vez.</div>
         </div>
@@ -234,9 +301,9 @@ textarea#qtext{position:absolute;left:-9999px}
             <label class="chk"><input type="checkbox" id="u-noc"> Nocturna 21–23 h <em>+50%</em></label>
           </div>
           <div class="row">
-            <label class="f">Peonetas para cargar<input id="u-pc" type="number" min="0" step="1" class="auto"></label>
-            <label class="f">Peonetas para descargar<input id="u-pd" type="number" min="0" step="1" class="auto"></label>
-            <label class="f">Horas de sobreestadía<input id="u-sob" type="number" min="0" step="1" value="0"></label>
+            <label class="f">Peonetas para cargar<input id="u-pc" type="number" inputmode="numeric" min="0" step="1" class="auto"></label>
+            <label class="f">Peonetas para descargar<input id="u-pd" type="number" inputmode="numeric" min="0" step="1" class="auto"></label>
+            <label class="f">Horas de sobreestadía<input id="u-sob" type="number" inputmode="numeric" min="0" step="1" value="0"></label>
           </div>
           <div class="hint">Sobre 100 cajas sueltas la peoneta es obligatoria: 1 por cada 100 cajas, $30.000 cada una.</div>
         </div>
@@ -266,6 +333,11 @@ textarea#qtext{position:absolute;left:-9999px}
       </div>
     </div>
   </section>
+  <div class="mbar" id="mbar" aria-live="polite">
+    <div class="mv main"><span id="mb-l1">Exclusivo</span><b id="mb-v1">—</b></div>
+    <div class="mv"><span id="mb-l2">Consolidado</span><b id="mb-v2">—</b></div>
+    <button class="btn" id="mb-go">Ver detalle</button>
+  </div>
   <textarea id="qtext" aria-hidden="true" tabindex="-1"></textarea>
 </div>
 
@@ -339,6 +411,19 @@ function conductorFor(c, col){
 }
 
 let lastQuote='';
+let curTab='reg';
+const MB={reg:null,urb:null};
+function setBar(tab,l1,v1,l2,v2){ MB[tab]={l1,v1,l2,v2}; if(tab===curTab) paintBar(); }
+function paintBar(){
+  const m=MB[curTab], bar=$('mbar');
+  if(curTab==='par'){ bar.hidden=true; return; }
+  bar.hidden=false;
+  $('mb-l1').textContent=m?m.l1:(curTab==='reg'?'Exclusivo':'Total');
+  $('mb-v1').textContent=m?m.v1:'—';
+  $('mb-l2').textContent=m?m.l2:(curTab==='reg'?'Consolidado':'Flete falso');
+  $('mb-v2').textContent=m?m.v2:'—';
+}
+$('mb-go').addEventListener('click',()=>{ const el=$(curTab==='reg'?'r-out':'u-out'); el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth', block:'start'}); });
 function calcReg(){
   const g=P.gen, origin=$('r-origin').value, c=findComuna($('r-dest').value);
   const kg=num('r-kg'),m3=num('r-m3'),pal=num('r-pal');
@@ -406,7 +491,7 @@ function calcReg(){
   if(!ready){
     out.innerHTML = `<div class="step"><h2>Resultado</h2><p class="note">Elige una comuna de destino para ver el valor. Si la comuna no está en la lista, escribe los km de ida a mano.</p></div>`;
     if(kmIda && !c){ /* km manual sin comuna */ }
-    if(!(kmIda)) return;
+    if(!(kmIda)){ setBar('reg','Exclusivo','—','Consolidado','—'); return; }
   }
   out.innerHTML = `
     <div class="step"><h2>Valor a cotizar · neto</h2>
@@ -435,6 +520,7 @@ function calcReg(){
     `Exclusivo (2 días hábiles): ${fmt(excl)} + IVA\nConsolidado (10 días hábiles): ${fmt(cons)} + IVA`+
     `${hid?'\nIncluye rampa hidráulica.':''}`;
   $('r-copy').onclick = ()=>copyText(lastQuote,'r-copied');
+  setBar('reg','Exclusivo',fmt(excl),'Consolidado',fmt(cons));
 }
 function copyText(t,flagId){
   const done=()=>{ const f=$(flagId); f.hidden=false; setTimeout(()=>f.hidden=true,1600); };
@@ -469,9 +555,9 @@ function calcUrb(){
   const pc=num('u-pc')||0, pd=num('u-pd')||0;
   const destTxt=$('u-dest').value; const c = destTxt? (RM.find(x=>norm(x[0])===norm(destTxt)) || findComuna(destTxt)) : null;
   const out=$('u-out');
-  if(!kg && !m3){ out.innerHTML=`<div class="step"><h2>Resultado</h2><p class="note">Ingresa peso o volumen para ver el tramo del tarifario.</p></div>`; return; }
+  if(!kg && !m3){ setBar('urb','Total','—','Flete falso','—'); out.innerHTML=`<div class="step"><h2>Resultado</h2><p class="note">Ingresa peso o volumen para ver el tramo del tarifario.</p></div>`; return; }
   const row = tab.find(r=>kg<=r[0] && m3<=r[1]);
-  if(!row){ out.innerHTML=`<div class="step"><h2>Resultado</h2><div class="alert bad">La carga supera el último tramo (${tab.at(-1)[0].toLocaleString('es-CL')} kg · ${tab.at(-1)[1]} m³). Cotizar caso a caso o usar Regiones.</div></div>`; return; }
+  if(!row){ setBar('urb','Total','Caso a caso','Flete falso','—'); out.innerHTML=`<div class="step"><h2>Resultado</h2><div class="alert bad">La carga supera el último tramo (${tab.at(-1)[0].toLocaleString('es-CL')} kg · ${tab.at(-1)[1]} m³). Cotizar caso a caso o usar Regiones.</div></div>`; return; }
   if(c && c[1]!=='Metropolitana') notes.push({bad:true,t:`${c[0]} está fuera de la RM. Usa la pestaña Regiones.`});
   const rural = c && c[1]==='Metropolitana' && !LISTED.includes(norm(c[0]));
   const base=row[2], L=[[`Tramo hasta ${row[0].toLocaleString('es-CL')} kg · ${String(row[1]).replace('.',',')} m³`,'tarifa consolidado',base]];
@@ -505,6 +591,7 @@ function calcUrb(){
     <div class="actions"><button class="btn" id="u-copy">Copiar cotización</button><span class="copied" id="u-copied" hidden>Copiado</span></div>`;
   const q=`Cotización transporte ${uOrigin==='air'?'Aeropuerto':'Puerto SAI/VAP'}${c?' → '+c[0]:''}\n${kg?kg.toLocaleString('es-CL')+' kg':''}${m3?' · '+m3+' m³':''}\n`+L.map(x=>`${x[0]}: ${fmt(x[2])}`).join('\n')+`\nTotal: ${fmt(tot)} + IVA`;
   $('u-copy').onclick=()=>copyText(q,'u-copied');
+  setBar('urb','Total',fmt(tot),'Flete falso',fmt(base*.7));
 }
 ['u-dest','u-mode','u-kg','u-m3','u-box','u-hidr','u-noap','u-imo','u-sab','u-ext','u-noc','u-sob'].forEach(id=>{ $(id).addEventListener('input',calcUrb); $(id).addEventListener('change',calcUrb); });
 
@@ -530,6 +617,7 @@ document.querySelector('.tabs').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return;
   document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
   ['reg','urb','par'].forEach(t=>$('v-'+t).hidden = t!==b.dataset.tab);
+  curTab=b.dataset.tab; paintBar();
   if(b.dataset.tab==='reg') calcReg(); if(b.dataset.tab==='urb') calcUrb(); if(b.dataset.tab==='par') renderParams();
 });
 
@@ -538,3 +626,6 @@ $('r-dest').value='Temuco · Araucanía'; $('r-kg').value=3200; $('r-m3').value=
 $('u-dest').value='Las Condes'; $('u-kg').value=850; $('u-m3').value=2.5;
 calcReg(); calcUrb(); renderParams();
 </script>
+
+</body>
+</html>
