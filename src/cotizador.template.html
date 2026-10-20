@@ -1,0 +1,540 @@
+<title>Cotizador CHLG</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: barra de ruta arriba; formulario a la izquierda, resultado fijo a la derecha; una columna en teléfono */
+:root{
+  --bg:#EEF1F5; --surface:#FFFFFF; --surface-2:#F6F8FB; --ink:#0F1B2D; --muted:#5A677A; --line:#D5DCE6;
+  --accent:#14386B; --accent-ink:#FFFFFF; --signal:#C42A3C; --ok:#1F7A4D; --warn:#A35F00; --warn-bg:#FFF4E0;
+  --road:#0E6B47; --road-ink:#FFFFFF;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-num:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B111A; --surface:#131C29; --surface-2:#18233300; --ink:#E5EBF3; --muted:#93A0B3; --line:#263347;
+  --accent:#8DB2EE; --accent-ink:#0B111A; --signal:#FF7482; --ok:#5FD39A; --warn:#F1B65A; --warn-bg:#2C2210;
+  --road:#1E8A5E; --road-ink:#FFFFFF; color-scheme:dark;
+  --surface-2:#182333;
+}}
+:root[data-theme="dark"]{
+  --bg:#0B111A; --surface:#131C29; --surface-2:#182333; --ink:#E5EBF3; --muted:#93A0B3; --line:#263347;
+  --accent:#8DB2EE; --accent-ink:#0B111A; --signal:#FF7482; --ok:#5FD39A; --warn:#F1B65A; --warn-bg:#2C2210;
+  --road:#1E8A5E; --road-ink:#FFFFFF; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-weight:700;font-size:28px;letter-spacing:.01em;margin:0;line-height:1.05;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-weight:500;font-size:14px;color:var(--muted);letter-spacing:0;margin-top:4px}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px;max-width:100%;overflow-x:auto}
+.tabs button{white-space:nowrap}
+.tabs button{font:600 14px var(--f-body);border:0;background:transparent;color:var(--muted);padding:7px 14px;border-radius:999px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* señal de ruta */
+.roadsign{background:var(--road);color:var(--road-ink);border-radius:var(--r);padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.55), inset 0 0 0 4px var(--road)}
+.roadsign .pt{font-family:var(--f-display);font-weight:600;font-size:20px;line-height:1.1;min-width:0}
+.roadsign .pt span{display:block;font-family:var(--f-body);font-size:12px;font-weight:500;opacity:.85;letter-spacing:.06em;text-transform:uppercase}
+.roadsign .arrow{font-family:var(--f-display);font-size:24px;opacity:.9}
+.roadsign .km{margin-left:auto;font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1;text-align:right}
+.roadsign .km span{display:block;font-family:var(--f-body);font-size:12px;font-weight:500;opacity:.85}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:18px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.step{display:flex;flex-direction:column;gap:10px}
+.step h2{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted);min-width:0}
+input,select{font:500 15px var(--f-body);color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
+input[type=number]{font-family:var(--f-num);font-size:14px}
+input.auto{border-style:dashed}
+.hint{font-size:12.5px;color:var(--muted);font-weight:500}
+.hint b{color:var(--ink)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:600 13.5px var(--f-body);background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.vehs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.veh{text-align:left;font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.veh b{font-family:var(--f-display);font-size:16px;font-weight:600}
+.veh span{font-size:12px;color:var(--muted);font-family:var(--f-num)}
+.veh[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.veh.nofit{opacity:.45}
+.veh .tag{font:600 10.5px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--ok)}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.chk input{width:auto;margin:0}
+.chk em{font-style:normal;margin-left:auto;font-family:var(--f-num);font-size:12px;color:var(--muted);white-space:nowrap}
+details{border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--accent)}
+details[open] summary{margin-bottom:10px}
+
+/* resultado */
+.result{position:sticky;top:max(12px,env(safe-area-inset-top,0px))}
+.price{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pbox{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.pbox.main{border-color:var(--accent);background:var(--surface-2)}
+.pbox .lbl{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pbox .val{font-family:var(--f-num);font-weight:600;font-size:clamp(17px,4.6vw,22px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.pbox .sub{font-size:12px;color:var(--muted)}
+table.bd{width:100%;border-collapse:collapse;font-size:14px}
+table.bd td{padding:5px 0;border-bottom:1px dotted var(--line)}
+table.bd td:last-child{text-align:right;font-family:var(--f-num);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:8px}
+table.bd td small{color:var(--muted);font-size:12px;display:block}
+table.bd tr.tot td{border-bottom:0;border-top:1px solid var(--ink);font-weight:700;padding-top:7px}
+.alert{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:9px 11px;font-size:13.5px;font-weight:600}
+.alert.bad{color:var(--signal)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:600 14px var(--f-body);border-radius:8px;padding:9px 14px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);text-decoration:none;display:inline-flex;align-items:center}
+.btn.ghost{background:transparent;color:var(--accent)}
+.copied{font-size:13px;color:var(--ok);align-self:center}
+textarea#qtext{position:absolute;left:-9999px}
+
+/* parametros */
+.ptable{overflow-x:auto}
+.ptable table{border-collapse:collapse;min-width:640px;width:100%;font-size:13.5px}
+.ptable th,.ptable td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left}
+.ptable th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.ptable input{padding:6px 8px;font-size:13px}
+.note{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.pbox .val{transition:color .2s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Cotizador de transporte CHLG<small>Ingresa destino y carga; los kilómetros, el vehículo y el costo se calculan solos.</small></h1>
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="t-reg" aria-selected="true" data-tab="reg">Regiones</button>
+      <button role="tab" id="t-urb" aria-selected="false" data-tab="urb">Santiago · Aeropuerto / Puerto</button>
+      <button role="tab" id="t-par" aria-selected="false" data-tab="par">Parámetros</button>
+    </nav>
+  </header>
+
+  <!-- ===================== REGIONES ===================== -->
+  <section id="v-reg" class="flex">
+    <div class="roadsign" id="sign">
+      <div class="pt"><span>Desde</span><b id="s-from">Pudahuel</b></div>
+      <div class="arrow">→</div>
+      <div class="pt"><span>Hasta</span><b id="s-to">—</b></div>
+      <div class="km" id="s-km">— km<span>ida por carretera</span></div>
+    </div>
+    <div class="grid" style="margin-top:18px">
+      <div class="panel">
+        <div class="step">
+          <h2>1 · Ruta</h2>
+          <div class="row">
+            <label class="f">Origen
+              <select id="r-origin">
+                <option value="PUD">Pudahuel (bodega)</option>
+                <option value="AMB">Aeropuerto AMB</option>
+                <option value="SAI">Puerto San Antonio</option>
+                <option value="VAP">Puerto Valparaíso</option>
+              </select>
+            </label>
+            <label class="f">Comuna de destino
+              <input id="r-dest" list="comunas" placeholder="Escribe la comuna…" autocomplete="off">
+            </label>
+          </div>
+          <datalist id="comunas"></datalist>
+          <div class="row">
+            <label class="f">Km ida
+              <input id="r-km" type="number" min="0" step="1" class="auto">
+            </label>
+            <label class="f">Días de viaje
+              <input id="r-days" type="number" min="1" step="1" class="auto">
+            </label>
+            <label class="f">Noches fuera
+              <input id="r-nights" type="number" min="0" step="1" class="auto">
+            </label>
+          </div>
+          <div class="hint" id="r-routehint">Los campos punteados se calculan solos. Escribe encima solo si quieres cambiarlos.</div>
+        </div>
+
+        <div class="step">
+          <h2>2 · Carga</h2>
+          <div class="row">
+            <label class="f">Peso (kg)<input id="r-kg" type="number" min="0" step="10"></label>
+            <label class="f">Volumen (m³)<input id="r-m3" type="number" min="0" step="0.5"></label>
+            <label class="f">Pallets<input id="r-pal" type="number" min="0" step="1"></label>
+          </div>
+          <div class="vehs" id="r-vehs"></div>
+          <div class="hint" id="r-vehhint"></div>
+        </div>
+
+        <div class="step">
+          <h2>3 · Adicionales</h2>
+          <div class="checks">
+            <label class="chk"><input type="checkbox" id="x-peon"> Peoneta todo el viaje <em id="x-peon-v"></em></label>
+            <label class="chk"><input type="checkbox" id="x-hidr"> Rampa hidráulica <em id="x-hidr-v"></em></label>
+            <label class="chk"><input type="checkbox" id="x-sab"> Incluye sábado <em id="x-sab-v"></em></label>
+            <label class="chk"><input type="checkbox" id="x-fer"> Domingo / feriado <em id="x-fer-v"></em></label>
+          </div>
+          <details>
+            <summary>Ajustar peajes, margen y otros</summary>
+            <div class="row">
+              <label class="f">Peajes ($)<input id="r-toll" type="number" min="0" step="100" class="auto"></label>
+              <label class="f">Viaje conductor ($)<input id="r-cond" type="number" min="0" step="1000" class="auto"></label>
+              <label class="f">Otros gastos ($)<input id="r-other" type="number" min="0" step="1000" value="0"></label>
+              <label class="f">Margen (%)<input id="r-margin" type="number" min="0" max="200" step="1" class="auto"></label>
+            </div>
+            <div class="hint" style="margin-top:8px">Peajes estimados según km recorridos y tipo de vehículo (ya incluyen el 20% adicional que usa la planilla). Si conoces el valor real, escríbelo.</div>
+          </details>
+        </div>
+      </div>
+
+      <aside class="panel result" id="r-out" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <!-- ===================== URBANO ===================== -->
+  <section id="v-urb" hidden>
+    <div class="grid">
+      <div class="panel">
+        <div class="step">
+          <h2>1 · Servicio</h2>
+          <div class="seg" id="u-origin">
+            <button aria-pressed="true" data-v="air">Aeropuerto (impo/expo)</button>
+            <button aria-pressed="false" data-v="port">Puerto SAI / VAP</button>
+          </div>
+          <div class="row">
+            <label class="f">Comuna de entrega / retiro
+              <input id="u-dest" list="comunasRM" placeholder="Comuna de la RM…" autocomplete="off">
+            </label>
+            <label class="f">Modalidad
+              <select id="u-mode"><option value="cons">Consolidado</option><option value="excl">Exclusivo</option></select>
+            </label>
+          </div>
+          <datalist id="comunasRM"></datalist>
+        </div>
+        <div class="step">
+          <h2>2 · Carga</h2>
+          <div class="row">
+            <label class="f">Peso (kg)<input id="u-kg" type="number" min="0" step="10"></label>
+            <label class="f">Volumen (m³)<input id="u-m3" type="number" min="0" step="0.1"></label>
+            <label class="f">Cajas sueltas<input id="u-box" type="number" min="0" step="1" value="0"></label>
+          </div>
+          <div class="hint">Se usa el primer tramo del tarifario que cubre peso y volumen a la vez.</div>
+        </div>
+        <div class="step">
+          <h2>3 · Recargos</h2>
+          <div class="checks">
+            <label class="chk"><input type="checkbox" id="u-hidr"> Plataforma hidráulica <em>$25.000</em></label>
+            <label class="chk"><input type="checkbox" id="u-noap"> Carga no apilable <em>+20%</em></label>
+            <label class="chk"><input type="checkbox" id="u-imo"> Carga IMO <em>+30%</em></label>
+            <label class="chk"><input type="checkbox" id="u-sab"> Sábado <em>$50.000</em></label>
+            <label class="chk"><input type="checkbox" id="u-ext"> Horario 7–9 ó 18–20 h <em>$45.000</em></label>
+            <label class="chk"><input type="checkbox" id="u-noc"> Nocturna 21–23 h <em>+50%</em></label>
+          </div>
+          <div class="row">
+            <label class="f">Peonetas para cargar<input id="u-pc" type="number" min="0" step="1" class="auto"></label>
+            <label class="f">Peonetas para descargar<input id="u-pd" type="number" min="0" step="1" class="auto"></label>
+            <label class="f">Horas de sobreestadía<input id="u-sob" type="number" min="0" step="1" value="0"></label>
+          </div>
+          <div class="hint">Sobre 100 cajas sueltas la peoneta es obligatoria: 1 por cada 100 cajas, $30.000 cada una.</div>
+        </div>
+      </div>
+      <aside class="panel result" id="u-out" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <!-- ===================== PARAMETROS ===================== -->
+  <section id="v-par" hidden>
+    <div class="panel">
+      <div class="step">
+        <h2>Costos generales</h2>
+        <div class="row" id="p-gen"></div>
+      </div>
+      <div class="step">
+        <h2>Vehículos</h2>
+        <div class="ptable"><table id="p-veh"></table></div>
+      </div>
+      <div class="step">
+        <h2>Valor viaje conductor (se paga desde Chillán / La Serena)</h2>
+        <div class="ptable"><table id="p-cond"></table></div>
+      </div>
+      <div class="actions">
+        <button class="btn ghost" id="p-reset">Restaurar valores de la planilla</button>
+        <span class="note" id="p-saved">Los cambios se guardan solo en este navegador.</span>
+      </div>
+    </div>
+  </section>
+  <textarea id="qtext" aria-hidden="true" tabindex="-1"></textarea>
+</div>
+
+<script>
+// [comuna, region, kmPUD, kmSAI, kmVAP, kmAMB, horasPUD, flag, lat, lon]
+const COMUNAS = __DATA__;
+
+const DEFAULTS = {
+  gen:{diesel:1400, viatico:10000, hospedaje:55000, sueldoMes:1000000, peonetaMes:600000, diasMes:25, diasHabiles:22,
+       feriado:40000, hidraulica:25000, chacao:45000, kmDia:650, consolidado:65, umbralConductor:400},
+  veh:[
+    {id:'sav', name:'Pick-up Saveiro', kg:500,  m3:1,  pal:1,  rend:12, leasing:600000, desgaste:200000, margen:50, peajeKm:80,  sabado:25000, col:'B', fleet:'VLLJ62'},
+    {id:'h100',name:'Camioneta 1.700 kg', kg:1700, m3:8,  pal:3,  rend:7,  leasing:600000, desgaste:200000, margen:50, peajeKm:100, sabado:25000, col:'B', fleet:'JAC X200 · Boxer · HD35'},
+    {id:'c5',  name:'Camión 5.000 kg', kg:5000, m3:27, pal:8,  rend:5,  leasing:700000, desgaste:250000, margen:50, peajeKm:135, sabado:30000, col:'A4', fleet:'NPR · Cargo 916 · Mighty'},
+    {id:'c10', name:'Camión 10.000 kg',kg:10000,m3:43, pal:14, rend:3,  leasing:600000, desgaste:200000, margen:40, peajeKm:150, sabado:25000, col:'A4', fleet:'FTR · Constellation · NQR'},
+    {id:'c17', name:'Camión 17.000 kg',kg:17000,m3:50, pal:16, rend:3,  leasing:600000, desgaste:200000, margen:40, peajeKm:150, sabado:25000, col:'A4', fleet:'Cargo 1933'},
+    {id:'ram', name:'Rampla',          kg:30000,m3:60, pal:24, rend:2,  leasing:800000, desgaste:200000, margen:50, peajeKm:250, sabado:25000, col:'R', fleet:'Monon 3 ejes'}
+  ],
+  cond:[
+    ['Arica',-18.479,-70.321,140000,140000,170000],['Iquique',-20.214,-70.152,150000,120000,150000],
+    ['Antofagasta',-23.646,-70.398,110000,90000,120000],['Calama',-22.462,-68.927,120000,100000,130000],
+    ['Copiapó',-27.366,-70.332,80000,70000,100000],['Huasco',-28.465,-71.221,60000,60000,90000],
+    ['La Serena / Coquimbo / Ovalle',-29.903,-71.252,50000,50000,80000],['Chillán',-36.607,-72.103,35000,35000,65000],
+    ['Los Ángeles',-37.471,-72.352,50000,50000,80000],['Concepción / Coronel / Talcahuano',-36.827,-73.05,60000,50000,80000],
+    ['Temuco',-38.736,-72.591,60000,60000,90000],['Valdivia',-39.814,-73.246,70000,70000,100000],
+    ['Osorno',-40.574,-73.136,80000,80000,110000],['Puerto Montt',-41.472,-72.94,90000,90000,120000],
+    ['Castro',-42.482,-73.764,90000,90000,120000],['Quellón',-43.12,-73.62,120000,120000,150000]
+  ]
+};
+
+const ORIGINS = {PUD:{label:'Pudahuel',idx:2,q:'Pudahuel, Chile'},SAI:{label:'Puerto San Antonio',idx:3,q:'Puerto San Antonio, Chile'},
+                 VAP:{label:'Puerto Valparaíso',idx:4,q:'Puerto de Valparaíso, Chile'},AMB:{label:'Aeropuerto AMB',idx:5,q:'Aeropuerto Arturo Merino Benítez'}};
+
+// ---------- estado y utilidades ----------
+let P = load();
+function load(){ try{ const s=JSON.parse(localStorage.getItem('chlg-params')); if(s&&s.gen&&s.veh&&s.cond) return s; }catch(e){} return structuredClone(DEFAULTS); }
+function save(){ try{ localStorage.setItem('chlg-params',JSON.stringify(P)); }catch(e){} }
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Math.round(n).toLocaleString('es-CL');
+const num = (id) => { const v=$(id).value; return v===''?null:Number(v); };
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+const keyOf = c => `${c[0]} · ${c[1]}`;
+const BYKEY = new Map(COMUNAS.map(c=>[norm(keyOf(c)),c]));
+const BYNAME = new Map(); COMUNAS.forEach(c=>{ if(!BYNAME.has(norm(c[0]))) BYNAME.set(norm(c[0]),c); });
+function findComuna(txt){ if(!txt) return null; const n=norm(txt); return BYKEY.get(n)||BYNAME.get(n)||BYNAME.get(n.split('·')[0].trim())||null; }
+function haversine(a1,o1,a2,o2){const R=6371,t=Math.PI/180;const da=(a2-a1)*t,dl=(o2-o1)*t;const x=Math.sin(da/2)**2+Math.cos(a1*t)*Math.cos(a2*t)*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+
+// overrides: un campo "auto" se vuelve manual cuando el usuario escribe
+const manual = new Set();
+function bindAuto(id){ $(id).addEventListener('input',()=>{ if($(id).value==='') manual.delete(id); else manual.add(id); $(id).classList.toggle('auto',!manual.has(id)); calcReg(); }); }
+function setAuto(id,v){ if(!manual.has(id)) $(id).value = v==null?'':v; }
+
+// ---------- REGIONES ----------
+document.getElementById('comunas').innerHTML = COMUNAS.map(c=>`<option value="${keyOf(c)}">`).join('');
+let vehChoice = null; // null = automático
+
+function fits(v,kg,m3,pal){ return (kg||0)<=v.kg && (m3||0)<=v.m3 && (pal||0)<=v.pal; }
+function renderVehs(auto){
+  const kg=num('r-kg'),m3=num('r-m3'),pal=num('r-pal');
+  $('r-vehs').innerHTML = P.veh.map(v=>{
+    const sel = (vehChoice||auto)===v.id, ok=fits(v,kg,m3,pal);
+    return `<button class="veh ${ok?'':'nofit'}" aria-pressed="${sel}" data-id="${v.id}">
+      ${auto===v.id?'<span class="tag">Sugerido</span>':''}<b>${v.name}</b>
+      <span>${v.kg.toLocaleString('es-CL')} kg · ${v.m3} m³ · ${v.pal} pal</span></button>`;}).join('');
+}
+$('r-vehs').addEventListener('click',e=>{ const b=e.target.closest('.veh'); if(!b) return; vehChoice = vehChoice===b.dataset.id?null:b.dataset.id; calcReg(); });
+
+function conductorFor(c, col){
+  let best=null,bd=1e9; for(const r of P.cond){ const d=haversine(c[8],c[9],r[1],r[2]); if(d<bd){bd=d;best=r;} }
+  const i = col==='A4'?3:col==='B'?4:5; return {city:best[0], val:best[i]};
+}
+
+let lastQuote='';
+function calcReg(){
+  const g=P.gen, origin=$('r-origin').value, c=findComuna($('r-dest').value);
+  const kg=num('r-kg'),m3=num('r-m3'),pal=num('r-pal');
+  const autoV = (P.veh.find(v=>fits(v,kg,m3,pal))||P.veh[P.veh.length-1]).id;
+  renderVehs(autoV);
+  const v = P.veh.find(x=>x.id===(vehChoice||autoV));
+  const notes=[];
+  if(!fits(v,kg,m3,pal)) notes.push({bad:true,t:`La carga supera la capacidad de ${v.name} (${v.kg.toLocaleString('es-CL')} kg · ${v.m3} m³ · ${v.pal} pallets).`});
+  $('r-vehhint').innerHTML = vehChoice ? `Vehículo elegido a mano. Toca de nuevo para volver al sugerido.` : `Se sugiere el vehículo más chico donde cabe la carga.`;
+
+  // ruta
+  const routeKm = c ? c[ORIGINS[origin].idx] : null;
+  setAuto('r-km', routeKm);
+  $('s-from').textContent = ORIGINS[origin].label;
+  $('s-to').textContent = c ? `${c[0]} (${c[1]})` : '—';
+  const kmIda = num('r-km');
+  $('s-km').innerHTML = (kmIda!=null? kmIda.toLocaleString('es-CL')+' km':'— km') + `<span>ida por carretera${c&&c[6]&&origin==='PUD'?' · ≈ '+String(c[6]).replace('.',',')+' h':''}</span>`;
+  if(c && c[7]==='isla') notes.push({bad:true,t:`${c[0]} no tiene acceso por carretera. Cotizar caso a caso.`});
+  if(c && c[7]==='caso') notes.push({t:`${c[0]}: ruta con barcaza o por Argentina. Revisa los km y cotiza caso a caso.`});
+  if(c && c[7]==='chacao') notes.push({t:`Destino en Chiloé: se suma el cruce Pargua–Chacao.`});
+
+  const dIn = manual.has('r-days') ? num('r-days') : null;
+  const dias = dIn || (kmIda? Math.max(1,Math.ceil(kmIda/g.kmDia)) : 1);
+  setAuto('r-days', dias);
+  setAuto('r-nights', Math.max(0,dias-1));
+  const noches = num('r-nights')??0;
+
+  const cond = (c && kmIda>=g.umbralConductor) ? conductorFor(c,v.col) : null;
+  setAuto('r-cond', cond?cond.val:0);
+  const kmTot = (kmIda||0)*2;
+  setAuto('r-toll', Math.round(kmTot*v.peajeKm/100)*100);
+  setAuto('r-margin', v.margen);
+
+  const dia = x => x/g.diasHabiles;
+  const L = [];
+  const litros = kmTot/v.rend;
+  L.push(['Combustible', `${Math.round(litros).toLocaleString('es-CL')} L · ${kmTot.toLocaleString('es-CL')} km ida y vuelta`, litros*g.diesel]);
+  L.push(['Peajes', manual.has('r-toll')?'valor ingresado':'estimado', num('r-toll')||0]);
+  L.push(['Sueldo chofer', `${dias} día${dias>1?'s':''}`, g.sueldoMes/g.diasMes*dias]);
+  L.push(['Viáticos', `${dias} × ${fmt(g.viatico)}`, g.viatico*dias]);
+  if(noches) L.push(['Hospedaje', `${noches} noche${noches>1?'s':''}`, g.hospedaje*noches]);
+  L.push(['Leasing', `${dias} día${dias>1?'s':''}`, dia(v.leasing)*dias]);
+  L.push(['Desgaste vehículo', `${dias} día${dias>1?'s':''}`, dia(v.desgaste)*dias]);
+  const condV = num('r-cond')||0; if(condV) L.push(['Viaje conductor', cond?cond.city:'valor ingresado', condV]);
+  if($('x-peon').checked) L.push(['Peoneta', `${dias} día${dias>1?'s':''}`, g.peonetaMes/g.diasMes*dias]);
+  if($('x-sab').checked) L.push(['Recargo sábado','',v.sabado]);
+  if($('x-fer').checked) L.push(['Domingo / feriado','',g.feriado]);
+  if(c && c[7]==='chacao') L.push(['Cruce Pargua–Chacao','',g.chacao]);
+  const otros=num('r-other')||0; if(otros) L.push(['Otros','',otros]);
+
+  $('x-peon-v').textContent = fmt(g.peonetaMes/g.diasMes)+'/día';
+  $('x-hidr-v').textContent = fmt(g.hidraulica);
+  $('x-sab-v').textContent = fmt(v.sabado);
+  $('x-fer-v').textContent = fmt(g.feriado);
+
+  const costo = L.reduce((s,x)=>s+x[2],0);
+  const mg = (num('r-margin')??v.margen)/100;
+  const margen = costo*mg;
+  const hid = $('x-hidr').checked ? g.hidraulica : 0;
+  const excl = costo+margen+hid;
+  const cons = (costo+margen)*g.consolidado/100+hid;
+  const ready = c && kmIda;
+
+  const out = $('r-out');
+  if(!ready){
+    out.innerHTML = `<div class="step"><h2>Resultado</h2><p class="note">Elige una comuna de destino para ver el valor. Si la comuna no está en la lista, escribe los km de ida a mano.</p></div>`;
+    if(kmIda && !c){ /* km manual sin comuna */ }
+    if(!(kmIda)) return;
+  }
+  out.innerHTML = `
+    <div class="step"><h2>Valor a cotizar · neto</h2>
+      <div class="price">
+        <div class="pbox main"><span class="lbl">Exclusivo</span><span class="val">${fmt(excl)}</span><span class="sub">2 días hábiles · + IVA</span></div>
+        <div class="pbox"><span class="lbl">Consolidado</span><span class="val">${fmt(cons)}</span><span class="sub">10 días hábiles · ${g.consolidado}% del exclusivo</span></div>
+      </div>
+    </div>
+    ${notes.map(n=>`<div class="alert ${n.bad?'bad':''}">${n.t}</div>`).join('')}
+    <div class="step"><h2>${v.name} · ${dias} día${dias>1?'s':''}</h2>
+      <table class="bd">
+        ${L.map(x=>`<tr><td>${x[0]}${x[1]?`<small>${x[1]}</small>`:''}</td><td>${fmt(x[2])}</td></tr>`).join('')}
+        <tr class="tot"><td>Costo</td><td>${fmt(costo)}</td></tr>
+        <tr><td>Margen ${Math.round(mg*100)}%</td><td>${fmt(margen)}</td></tr>
+        ${hid?`<tr><td>Rampa hidráulica<small>se suma sin margen</small></td><td>${fmt(hid)}</td></tr>`:''}
+        <tr class="tot"><td>Total exclusivo</td><td>${fmt(excl)}</td></tr>
+      </table>
+    </div>
+    <div class="actions">
+      <button class="btn" id="r-copy">Copiar cotización</button>
+      ${c?`<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=${encodeURIComponent(ORIGINS[origin].q)}&destination=${encodeURIComponent(c[0]+', '+c[1]+', Chile')}">Ver ruta en Google Maps</a>`:''}
+      <span class="copied" id="r-copied" hidden>Copiado</span>
+    </div>`;
+  lastQuote = `Cotización transporte de carga\n${ORIGINS[origin].label} → ${c?c[0]+' ('+c[1]+')':'destino'} · ${kmIda.toLocaleString('es-CL')} km ida\n`+
+    `Vehículo: ${v.name}${kg?` · ${kg.toLocaleString('es-CL')} kg`:''}${m3?` · ${m3} m³`:''}${pal?` · ${pal} pallets`:''}\n`+
+    `Exclusivo (2 días hábiles): ${fmt(excl)} + IVA\nConsolidado (10 días hábiles): ${fmt(cons)} + IVA`+
+    `${hid?'\nIncluye rampa hidráulica.':''}`;
+  $('r-copy').onclick = ()=>copyText(lastQuote,'r-copied');
+}
+function copyText(t,flagId){
+  const done=()=>{ const f=$(flagId); f.hidden=false; setTimeout(()=>f.hidden=true,1600); };
+  try{ navigator.clipboard.writeText(t).then(done).catch(()=>fallback()); }catch(e){ fallback(); }
+  function fallback(){ const ta=$('qtext'); ta.value=t; ta.select(); try{document.execCommand('copy');}catch(e){} done(); }
+}
+
+['r-origin','r-dest','r-kg','r-m3','r-pal','r-other','x-peon','x-hidr','x-sab','x-fer'].forEach(id=>{ $(id).addEventListener('input',calcReg); $(id).addEventListener('change',calcReg); });
+['r-km','r-days','r-nights','r-toll','r-cond','r-margin'].forEach(bindAuto);
+// cambiar de destino u origen libera km, días y peajes calculados
+['r-dest','r-origin'].forEach(id=>$(id).addEventListener('change',()=>{ ['r-km','r-days','r-nights','r-toll','r-cond'].forEach(k=>{manual.delete(k);$(k).classList.add('auto');}); calcReg(); }));
+
+// ---------- URBANO (tarifario PDF) ----------
+const AIR=[[100,.5,46000],[150,.65,49000],[200,.8,53000],[300,1,55000],[400,1.5,58000],[500,2,61000],[600,2.3,63000],[700,2.6,66000],[800,3,72000],[1000,4,76000],[1500,5,90000],[2500,8,94000],[3500,10.5,116000],[4500,13,127000],[6000,18,148000],[8000,30,182000]];
+const PORT=[[250,.5,88000],[500,1,105000],[1000,2,112000],[2000,4,145000],[2500,6,162000],[3500,8,181000],[4500,12,199000],[6000,16,220000],[8000,18,242000],[10000,25,279000],[11000,35,290000]];
+const LISTED=['Pudahuel','Quilicura','Renca','Huechuraba','Lampa','Maipú','Cerrillos','Estación Central','Quinta Normal','Lo Prado','Santiago','Independencia','Recoleta','Conchalí','Vitacura','Las Condes','La Reina','Ñuñoa','Providencia','Pedro Aguirre Cerda','San Joaquín','Macul','La Cisterna','La Granja','San Miguel','Peñalolén','La Florida','Puente Alto','San Bernardo','La Pintana','El Bosque','San Ramón'].map(norm);
+const RM = COMUNAS.filter(c=>c[1]==='Metropolitana');
+$('comunasRM').innerHTML = RM.map(c=>`<option value="${c[0]}">`).join('');
+let uOrigin='air';
+$('u-origin').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; uOrigin=b.dataset.v; [...$('u-origin').children].forEach(x=>x.setAttribute('aria-pressed',x===b)); calcUrb();});
+const uManual=new Set();
+['u-pc','u-pd'].forEach(id=>$(id).addEventListener('input',()=>{ if($(id).value==='')uManual.delete(id); else uManual.add(id); $(id).classList.toggle('auto',!uManual.has(id)); calcUrb(); }));
+function calcUrb(){
+  const kg=num('u-kg')||0, m3=num('u-m3')||0, box=num('u-box')||0, mode=$('u-mode').value;
+  const tab = uOrigin==='air'?AIR:PORT;
+  const notes=[];
+  const opt=$('u-mode').querySelector('[value=excl]'); opt.disabled = uOrigin==='air';
+  if(uOrigin==='air' && mode==='excl'){ $('u-mode').value='cons'; }
+  if(uOrigin==='air') notes.push({t:'Aeropuerto: en importación solo consolidado; en exportación, exclusivo y consolidado a la misma tarifa.'});
+  const peon = box>100 ? Math.ceil(box/100) : 0;
+  if(!uManual.has('u-pc')) $('u-pc').value=peon; if(!uManual.has('u-pd')) $('u-pd').value=peon;
+  const pc=num('u-pc')||0, pd=num('u-pd')||0;
+  const destTxt=$('u-dest').value; const c = destTxt? (RM.find(x=>norm(x[0])===norm(destTxt)) || findComuna(destTxt)) : null;
+  const out=$('u-out');
+  if(!kg && !m3){ out.innerHTML=`<div class="step"><h2>Resultado</h2><p class="note">Ingresa peso o volumen para ver el tramo del tarifario.</p></div>`; return; }
+  const row = tab.find(r=>kg<=r[0] && m3<=r[1]);
+  if(!row){ out.innerHTML=`<div class="step"><h2>Resultado</h2><div class="alert bad">La carga supera el último tramo (${tab.at(-1)[0].toLocaleString('es-CL')} kg · ${tab.at(-1)[1]} m³). Cotizar caso a caso o usar Regiones.</div></div>`; return; }
+  if(c && c[1]!=='Metropolitana') notes.push({bad:true,t:`${c[0]} está fuera de la RM. Usa la pestaña Regiones.`});
+  const rural = c && c[1]==='Metropolitana' && !LISTED.includes(norm(c[0]));
+  const base=row[2], L=[[`Tramo hasta ${row[0].toLocaleString('es-CL')} kg · ${String(row[1]).replace('.',',')} m³`,'tarifa consolidado',base]];
+  const pct=(lbl,p)=>L.push([lbl,`+${p}% sobre tarifa`,base*p/100]);
+  if(uOrigin==='port' && mode==='excl') pct('Viaje exclusivo',50);
+  if($('u-noap').checked) pct('Carga no apilable',20);
+  if(rural) pct('Comuna no indicada en tarifario',15);
+  if($('u-imo').checked) pct('Recargo IMO',30);
+  if($('u-noc').checked) pct('Entrega nocturna',50);
+  if($('u-hidr').checked) L.push(['Plataforma hidráulica','reserva con 24 h',25000]);
+  if(pc) L.push(['Peoneta para cargar',`${pc} × $30.000`,pc*30000]);
+  if(pd) L.push(['Peoneta para descargar',`${pd} × $30.000`,pd*30000]);
+  if($('u-sab').checked) L.push(['Recargo sábado','',50000]);
+  if($('u-ext').checked) L.push(['Horario extendido','7–9 ó 18–20 h',45000]);
+  const sob=num('u-sob')||0; if(sob) L.push(['Sobreestadía',`${sob} h × $30.000`,sob*30000]);
+  const tot=L.reduce((s,x)=>s+x[2],0);
+  if(box>0 && box<=100) notes.push({t:'Hasta 100 cajas no se cobra peoneta.'});
+  out.innerHTML=`
+    <div class="step"><h2>Valor tarifario · neto</h2>
+      <div class="price">
+        <div class="pbox main"><span class="lbl">Total servicio</span><span class="val">${fmt(tot)}</span><span class="sub">+ IVA · solo transporte</span></div>
+        <div class="pbox"><span class="lbl">Flete falso</span><span class="val">${fmt(base*.7)}</span><span class="sub">70% de la tarifa base</span></div>
+      </div>
+    </div>
+    ${notes.map(n=>`<div class="alert ${n.bad?'bad':''}">${n.t}</div>`).join('')}
+    <div class="step"><h2>${uOrigin==='air'?'Aeropuerto':'Puerto SAI / VAP'}${c?' → '+c[0]:''}</h2>
+      <table class="bd">${L.map(x=>`<tr><td>${x[0]}${x[1]?`<small>${x[1]}</small>`:''}</td><td>${fmt(x[2])}</td></tr>`).join('')}
+      <tr class="tot"><td>Total</td><td>${fmt(tot)}</td></tr></table>
+      <p class="note">Incluye 2 horas libres de carga y descarga hasta 2.000 kg / 10 m³. Tarifario válido hasta diciembre 2026.</p>
+    </div>
+    <div class="actions"><button class="btn" id="u-copy">Copiar cotización</button><span class="copied" id="u-copied" hidden>Copiado</span></div>`;
+  const q=`Cotización transporte ${uOrigin==='air'?'Aeropuerto':'Puerto SAI/VAP'}${c?' → '+c[0]:''}\n${kg?kg.toLocaleString('es-CL')+' kg':''}${m3?' · '+m3+' m³':''}\n`+L.map(x=>`${x[0]}: ${fmt(x[2])}`).join('\n')+`\nTotal: ${fmt(tot)} + IVA`;
+  $('u-copy').onclick=()=>copyText(q,'u-copied');
+}
+['u-dest','u-mode','u-kg','u-m3','u-box','u-hidr','u-noap','u-imo','u-sab','u-ext','u-noc','u-sob'].forEach(id=>{ $(id).addEventListener('input',calcUrb); $(id).addEventListener('change',calcUrb); });
+
+// ---------- PARAMETROS ----------
+const GEN_LABELS={diesel:'Precio diésel ($/L)',viatico:'Viático por día',hospedaje:'Hospedaje por noche',sueldoMes:'Sueldo chofer mensual',peonetaMes:'Sueldo peoneta mensual',diasMes:'Días para sueldo diario',diasHabiles:'Días para leasing/desgaste',feriado:'Recargo domingo/feriado',hidraulica:'Rampa hidráulica',chacao:'Cruce Pargua–Chacao',kmDia:'Km de ida por día de viaje',consolidado:'Consolidado (% del exclusivo)',umbralConductor:'Km desde que se paga viaje conductor'};
+const VEH_COLS=[['name','Vehículo','text'],['kg','Kg máx'],['m3','m³ máx'],['pal','Pallets'],['rend','Km/L'],['leasing','Leasing mes'],['desgaste','Desgaste mes'],['margen','Margen %'],['peajeKm','Peaje $/km'],['sabado','Sábado $']];
+function renderParams(){
+  $('p-gen').innerHTML=Object.keys(GEN_LABELS).map(k=>`<label class="f">${GEN_LABELS[k]}<input type="number" id="pg-${k}" data-k="${k}" value="${P.gen[k]}"></label>`).join('');
+  $('p-veh').innerHTML=`<tr>${VEH_COLS.map(c=>`<th>${c[1]}</th>`).join('')}</tr>`+P.veh.map((v,i)=>`<tr>${VEH_COLS.map(c=>`<td><input id="pv-${i}-${c[0]}" data-i="${i}" data-k="${c[0]}" type="${c[2]||'number'}" value="${v[c[0]]}"></td>`).join('')}</tr>`).join('');
+  $('p-cond').innerHTML=`<tr><th>Ciudad</th><th>Licencia A4 (camión)</th><th>Licencia B (camioneta)</th><th>Rampla</th></tr>`+P.cond.map((r,i)=>`<tr><td>${r[0]}</td>${[3,4,5].map(j=>`<td><input type="number" id="pc-${i}-${j}" data-i="${i}" data-j="${j}" value="${r[j]}"></td>`).join('')}</tr>`).join('');
+}
+$('v-par').addEventListener('input',e=>{
+  const t=e.target; if(t.tagName!=='INPUT') return;
+  if(t.id.startsWith('pg-')) P.gen[t.dataset.k]=Number(t.value)||0;
+  else if(t.id.startsWith('pv-')) P.veh[t.dataset.i][t.dataset.k]= t.type==='text'?t.value:(Number(t.value)||0);
+  else if(t.id.startsWith('pc-')) P.cond[t.dataset.i][t.dataset.j]=Number(t.value)||0;
+  save(); $('p-saved').textContent='Guardado en este navegador.';
+});
+$('p-reset').addEventListener('click',()=>{ P=structuredClone(DEFAULTS); save(); renderParams(); $('p-saved').textContent='Valores de la planilla restaurados.'; });
+
+// ---------- tabs ----------
+document.querySelector('.tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  ['reg','urb','par'].forEach(t=>$('v-'+t).hidden = t!==b.dataset.tab);
+  if(b.dataset.tab==='reg') calcReg(); if(b.dataset.tab==='urb') calcUrb(); if(b.dataset.tab==='par') renderParams();
+});
+
+// ejemplo inicial
+$('r-dest').value='Temuco · Araucanía'; $('r-kg').value=3200; $('r-m3').value=18; $('r-pal').value=6;
+$('u-dest').value='Las Condes'; $('u-kg').value=850; $('u-m3').value=2.5;
+calcReg(); calcUrb(); renderParams();
+</script>
